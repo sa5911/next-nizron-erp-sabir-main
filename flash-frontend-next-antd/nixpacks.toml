@@ -1,7 +1,10 @@
+[build]
+providers = ["node"]
+
 [install]
 pkgManager = "npm"
 
-[build]
+[phases.build]
 cmds = [
   "npm ci --legacy-peer-deps",
   "npm run build"
