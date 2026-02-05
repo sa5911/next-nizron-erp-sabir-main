@@ -1,10 +1,7 @@
 [build]
 providers = ["node"]
 
-[phases.setup]
-nixPkgs = ["nodejs_22"]
-
-[phases.install]
+[install]
 cmds = ["npm ci"]
 
 [phases.build]
