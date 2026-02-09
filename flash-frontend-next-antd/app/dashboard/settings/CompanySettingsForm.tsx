@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Card, Upload, message, App } from 'antd';
-import { UploadOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, message, App, Divider, Alert, Space } from 'antd';
+import {
+    CloudServerOutlined,
+    LockOutlined,
+} from '@ant-design/icons';
 import { companySettingsApi } from '@/lib/api';
-import { getFullFileUrl } from '@/lib/utils'; 
 
 export default function CompanySettingsForm() {
     const { message } = App.useApp();
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
-    const [imageUrl, setImageUrl] = useState<string>();
 
     useEffect(() => {
         fetchSettings();
@@ -21,38 +22,19 @@ export default function CompanySettingsForm() {
         try {
             const { data } = await companySettingsApi.get();
             form.setFieldsValue(data);
-            if (data.logo_url) {
-                setImageUrl(getFullFileUrl(data.logo_url));
-            }
         } catch (error) {
             console.error('Failed to fetch settings:', error);
-            message.error('Failed to load company settings');
+            message.error('Failed to load settings');
         } finally {
             setFetching(false);
         }
     };
 
-    console.log('Form values:', fetching);
-
     const onFinish = async (values: any) => {
         setLoading(true);
-        const formData = new FormData();
-        Object.keys(values).forEach(key => {
-            if (key !== 'logo' && values[key]) {
-                formData.append(key, values[key]);
-            }
-        });
-
-        if (values.logo && values.logo[0] && values.logo[0].originFileObj) {
-            formData.append('logo', values.logo[0].originFileObj);
-        }
-
         try {
-            const { data } = await companySettingsApi.update(formData);
+            await companySettingsApi.update(values);
             message.success('Settings updated successfully');
-            if (data.logo_url) {
-                setImageUrl(getFullFileUrl(data.logo_url));
-            }
         } catch (error) {
             console.error('Failed to update settings:', error);
             message.error('Failed to update settings');
@@ -61,65 +43,72 @@ export default function CompanySettingsForm() {
         }
     };
 
-    const normFile = (e: any) => {
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e?.fileList;
-    };
-
-    const uploadButton = (
-        <div>
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>Upload Logo</div>
-        </div>
-    );
-
     return (
-        <Card title="Company Information" loading={fetching}>
-            <Form
-                form={form}
-                layout="vertical"
-                onFinish={onFinish}
-            >
-                <Form.Item label="Company Logo" name="logo" valuePropName="fileList" getValueFromEvent={normFile}>
-                    <Upload
-                        name="logo"
-                        listType="picture-card"
-                        maxCount={1}
-                        beforeUpload={() => false}
-                        showUploadList={false}
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Card title="System Settings" loading={fetching}>
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={onFinish}
+                >
+                    <Divider orientation="left">
+                        <Space>
+                            <CloudServerOutlined />
+                            Cloud Storage Configuration (R2)
+                        </Space>
+                    </Divider>
+
+                    <Alert
+                        message="R2 Storage Connection"
+                        description="Configure your Cloudflare R2 or S3 storage here. If left blank, the system will use values from the server's .env file."
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 24 }}
+                    />
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <Form.Item
+                            name="r2_access_key_id"
+                            label="Access Key ID"
+                        >
+                            <Input prefix={<LockOutlined />} placeholder="Enter Access Key" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="r2_secret_access_key"
+                            label="Secret Access Key"
+                        >
+                            <Input.Password prefix={<LockOutlined />} placeholder="Enter Secret Key" />
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item
+                        name="r2_endpoint"
+                        label="S3 Endpoint URL"
                     >
-                        {imageUrl ? <img src={imageUrl} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : uploadButton}
-                    </Upload>
-                </Form.Item>
+                        <Input placeholder="https://<id>.r2.cloudflarestorage.com" />
+                    </Form.Item>
 
-                <Form.Item name="name" label="Company Name" rules={[{ required: true }]}>
-                    <Input placeholder="Nizron" />
-                </Form.Item>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <Form.Item name="r2_bucket_name" label="Bucket Name">
+                            <Input placeholder="nizron" />
+                        </Form.Item>
 
-                <Form.Item name="address" label="Address">
-                    <Input.TextArea rows={3} />
-                </Form.Item>
+                        <Form.Item
+                            name="r2_public_url_prefix"
+                            label="Public URL Prefix"
+                        >
+                            <Input placeholder="https://pub-xxx.r2.dev" />
+                        </Form.Item>
+                    </div>
 
-                <Form.Item name="phone" label="Phone">
-                    <Input />
-                </Form.Item>
-
-                <Form.Item name="email" label="Email">
-                    <Input />
-                </Form.Item>
-
-                <Form.Item name="website" label="Website">
-                    <Input />
-                </Form.Item>
-
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={loading} block>
-                        Save Changes
-                    </Button>
-                </Form.Item>
-            </Form>
-        </Card>
+                    <Form.Item style={{ marginTop: 24 }}>
+                        <Button type="primary" htmlType="submit" loading={loading} block size="large">
+                            Save Configuration
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Card>
+        </Space>
     );
 }

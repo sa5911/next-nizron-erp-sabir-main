@@ -96,6 +96,6 @@ export function getFileInterceptorOptions(uploadPath: string) {
  * Initialize (placeholder for potential future init logic)
  */
 export function initializeUploadDirectories(): void {
-  // No longer needed as we use Backblaze B2
-  console.log('✅ Cloud storage ready (Backblaze B2)');
+  // Cloud storage is initialized in CloudStorageService
+  console.log('✅ Cloud storage system ready');
 }

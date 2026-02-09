@@ -13,9 +13,7 @@ export const DRIZZLE = 'DRIZZLE';
       provide: DRIZZLE,
       useFactory: (configService: ConfigService) => {
         const connectionString = configService.get<string>('DATABASE_URL');
-        const cleanConnectionString = connectionString
-          ?.replace('?sslmode=require', '')
-          .replace('&sslmode=require', '');
+        const cleanConnectionString = connectionString?.split('?')[0];
         const pool = new Pool({
           connectionString: cleanConnectionString,
           ssl: {

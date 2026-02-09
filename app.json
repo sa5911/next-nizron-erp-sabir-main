@@ -1,0 +1,10 @@
+{
+  "android": {
+    "package": "com.sabir5911.nextnizronerpsabirmain"
+  },
+  "extra": {
+    "eas": {
+      "projectId": "14cb75df-d650-43f2-9001-0e1811ffda7f"
+    }
+  }
+}

@@ -4,7 +4,6 @@ import { View, Text, StyleSheet, Alert, Image, TextInput, ActivityIndicator, Pla
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
-import * as FaceDetector from 'expo-face-detector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
@@ -221,31 +220,7 @@ export default function DashboardScreen() {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const imageUri = result.assets[0].uri;
 
-      if (Platform.OS !== 'web' && typeof FaceDetector.detectFacesAsync === 'function') {
-        try {
-          const detection = await FaceDetector.detectFacesAsync(imageUri, {
-            mode: FaceDetector.FaceDetectorMode.fast,
-            detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
-            runClassifications: FaceDetector.FaceDetectorClassifications.none,
-          });
-
-          if (!detection?.faces || detection.faces.length === 0) {
-            Alert.alert('Face not detected', 'Please take a clear selfie with your face visible.');
-            setImage(null);
-            return;
-          }
-        } catch (e) {
-          console.warn('Face detection failed:', e);
-          Alert.alert('Face detection failed', 'Please try again.');
-          setImage(null);
-          return;
-        }
-      } else if (Platform.OS !== 'web') {
-        Alert.alert(
-          'Face detector unavailable',
-          'Please run the app in a development build. Expo Go does not include expo-face-detector.'
-        );
-      }
+      // Face detection removed: just use the camera image as selfie
 
       setImage(imageUri);
 

@@ -1,5 +1,14 @@
 {
   "dependencies": {
-    "@faker-js/faker": "^10.2.0"
+    "@faker-js/faker": "^10.2.0",
+    "expo": "^54.0.33",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
+  "name": "next-nizron-erp-sabir-main",
+  "version": "1.0.0",
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   }
 }

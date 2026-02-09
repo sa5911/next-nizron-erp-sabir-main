@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; // Change this to your actual API base URL
 
 interface ApiResponse<T> {
   data?: T;
@@ -46,7 +46,6 @@ class ApiClient {
         },
       });
 
-      // Handle 204 No Content responses (common for DELETE operations)
       if (response.status === 204) {
         return { data: undefined as T };
       }

@@ -57,7 +57,6 @@ export class AuthController {
     throw new HttpException('Missing FSS number', HttpStatus.BAD_REQUEST);
   }
 
-  console
 
   // Fetch employee from DB
 

@@ -73,3 +73,5 @@ check_columns.js
 run_migration.js
 seed.js
 migrate_employees.sql
+
+.vercel

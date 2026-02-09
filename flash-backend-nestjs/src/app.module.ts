@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
 
 // Database
@@ -8,6 +9,9 @@ import { DrizzleModule } from './db/drizzle.module';
 
 // Storage
 import { StorageModule } from './common/storage/storage.module';
+
+// Backup
+import { BackupModule } from './modules/backup/backup.module';
 
 // Core modules
 import { AuthModule } from './modules/auth/auth.module';
@@ -40,6 +44,7 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
       // Note: .env file only used in local development
       // In production, env vars come from the platform (Coolify, etc.)
     }),
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
@@ -50,6 +55,9 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
 
     // Storage
     StorageModule,
+
+    // Backup
+    BackupModule,
 
     // Core modules
     AuthModule,

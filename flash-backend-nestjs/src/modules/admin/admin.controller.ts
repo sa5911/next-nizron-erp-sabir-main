@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
+import { BackupService } from '../backup/backup.service';
 import {
   CreateRoleDto,
   UpdateRoleDto,
@@ -27,7 +28,17 @@ import { SuperUserGuard } from '../auth/guards/superuser.guard';
 @UseGuards(JwtAuthGuard, SuperUserGuard)
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly backupService: BackupService,
+  ) {}
+
+  @Post('backup')
+  @ApiOperation({ summary: 'Trigger manual database backup to cloud storage' })
+  async triggerBackup() {
+    await this.backupService.handleCronBackup();
+    return { message: 'Backup process started and old backups cleaned up.' };
+  }
 
   // Permissions
   @Get('permissions')

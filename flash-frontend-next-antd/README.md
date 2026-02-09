@@ -61,7 +61,7 @@ npm start
 ## 🔐 Default Login Credentials
 
 ```
-Email: admin@flash.com
+Email: admin@nizron.com
 Password: password123
 ```
 

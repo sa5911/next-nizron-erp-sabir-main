@@ -5,6 +5,7 @@ import { DRIZZLE } from 'src/db/drizzle.module';
 import * as schema from 'src/db/schema';
 import { eq } from 'drizzle-orm';
 import { UpdateCompanySettingsDto } from './dto/company-settings.dto';
+import { CloudStorageService } from '../../common/storage/cloud-storage.service';
 
 @Injectable()
 export class CompanySettingsService {
@@ -12,6 +13,7 @@ export class CompanySettingsService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: NodePgDatabase<typeof schema>,
+    private readonly cloudStorageService: CloudStorageService,
   ) {}
 
   async getSettings() {
@@ -42,7 +44,9 @@ export class CompanySettingsService {
       })
       .where(eq(schema.companySettings.id, existing.id))
       .returning();
-      
+
+    await this.cloudStorageService.initializeFromDb();
+
     return updated;
   }
 }

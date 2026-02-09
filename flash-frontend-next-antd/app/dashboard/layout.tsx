@@ -148,6 +148,11 @@ export default function DashboardLayout({
       ],
     },
     {
+      key: '/dashboard/settings',
+      icon: <SettingOutlined />,
+      label: 'Settings',
+    },
+    {
       key: '/dashboard/administration/roles',
       icon: <SettingOutlined />,
       label: 'Administration',

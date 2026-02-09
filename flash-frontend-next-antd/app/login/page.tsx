@@ -42,6 +42,7 @@ export default function LoginPage() {
           autoComplete="off"
           layout="vertical"
           size="large"
+          initialValues={{ email: 'admin@nizron.com', password: 'password123' }}
         >
           <Form.Item
             name="email"
@@ -75,7 +76,7 @@ export default function LoginPage() {
 
         <div className="text-center text-sm text-gray-500 mt-4">
           <p>Default credentials:</p>
-          <p>admin@flash.com / password123</p>
+          <p>admin@nizron.com / password123</p>
         </div>
       </Card>
     </div>
