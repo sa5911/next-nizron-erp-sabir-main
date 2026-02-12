@@ -1,6 +1,6 @@
-# Flash ERP Backend (NestJS)
+# Nizron ERP Backend (NestJS)
 
-Backend API for Flash Security Services Management System built with NestJS, PostgreSQL, and Drizzle ORM.
+Backend API for Nizron Security Services Management System built with NestJS, PostgreSQL, and Drizzle ORM.
 
 ## Features
 
@@ -45,7 +45,7 @@ cp .env.example .env
 
 2. Update `.env` with your database credentials:
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/flash_erp
+DATABASE_URL=postgresql://user:password@localhost:5432/nizron_erp
 JWT_SECRET=your-secret-key
 PORT=8000
 CORS_ORIGINS=http://localhost:3000

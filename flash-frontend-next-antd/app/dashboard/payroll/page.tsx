@@ -6,6 +6,7 @@ import { PrinterOutlined, DollarOutlined, CheckCircleOutlined, ClockCircleOutlin
 import { employeeApi, attendanceApi, payrollApi, clientApi } from '@/lib/api';
 import dayjs, { Dayjs } from 'dayjs';
 import { useReactToPrint } from 'react-to-print';
+import BarChart from '@/components/charts/BarChart';
 
 interface PayrollEmployee extends Record<string, unknown> {
   id: number;
@@ -200,11 +201,11 @@ function PayrollContent() {
       const curDays = sheetEntry?.cur_days_override ?? curDaysCount;
       const totalPaidDays = preDays + curDays + leaveDays;
       const perDaySalary = totalSalary / workingDays;
-      
+
       // Use edited OT Rate if available, otherwise use sheet entry or default
       const editedOtRate = editingValues[empId]?.ot_rate_override;
       const otRate = editedOtRate !== undefined ? editedOtRate : (sheetEntry?.ot_rate_override ?? 700);
-      
+
       const grossSalaryBase = totalPaidDays * perDaySalary;
 
       let overtimePay = 0;
@@ -213,17 +214,17 @@ function PayrollContent() {
       }
 
       const deductions = totalFines;
-      
+
       // Use edited values if available, otherwise use sheet entry
       const editedAllowOther = editingValues[empId]?.allow_other;
       const allowOther = editedAllowOther !== undefined ? editedAllowOther : parseFloat(String(sheetEntry?.allow_other || '0'));
-      
+
       const editedEobi = editingValues[empId]?.eobi;
       const eobi = editedEobi !== undefined ? editedEobi : parseFloat(String(sheetEntry?.eobi || '0'));
-      
+
       const editedTaxFineAdv = editingValues[empId]?.fine_adv_extra;
       const taxFineAdv = editedTaxFineAdv !== undefined ? editedTaxFineAdv : parseFloat(String(sheetEntry?.fine_adv_extra || '0'));
-      
+
       const netSalary = grossSalaryBase + overtimePay + allowOther - deductions - eobi - taxFineAdv;
       const assignment = (rawAssignments || []).find((a: any) => String(a.employee_id) === employeeId);
 
@@ -756,11 +757,11 @@ function PayrollContent() {
         const currentAllowOther = editingValues[record.id]?.allow_other ?? record.allow_other;
         const currentEobi = editingValues[record.id]?.eobi ?? record.eobi;
         const currentTaxFineAdv = editingValues[record.id]?.fine_adv_extra ?? record.taxFineAdv;
-        
+
         const calculatedOtAmount = Math.round(record.otDaysCount * currentOtRate);
         const baseNetSalary = record.grossSalary - record.overtimePay - record.allow_other;
         const calculatedNetSalary = Math.round(baseNetSalary + calculatedOtAmount + currentAllowOther - record.totalFines - currentEobi - currentTaxFineAdv);
-        
+
         return <span style={{ fontSize: '15px', color: '#0369a1', fontWeight: 800 }}>{calculatedNetSalary.toLocaleString()}</span>;
       }
     },
@@ -966,6 +967,30 @@ function PayrollContent() {
           </Col>
         </Row>
       </div>
+
+      {/* Payroll Insights Section */}
+      <Row gutter={[24, 24]} style={{ marginBottom: '32px' }}>
+        <Col xs={24}>
+          <Card title="Net Payable by Client" bordered={false} style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+            <BarChart
+              horizontal
+              data={{
+                labels: Array.from(new Set(clientSummaryData.map(c => c.clientName))),
+                datasets: [
+                  {
+                    label: 'Net Payable (Rs.)',
+                    data: Array.from(new Set(clientSummaryData.map(c => c.clientName))).map(name =>
+                      clientSummaryData.filter(c => c.clientName === name).reduce((sum, c) => sum + c.currentAmount, 0)
+                    ),
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4,
+                  }
+                ]
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
       {/* Main Table Controls */}
       <div style={{ marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center' }}>

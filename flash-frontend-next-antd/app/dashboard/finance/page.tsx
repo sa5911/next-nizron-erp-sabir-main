@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Drawer, Form, Input, InputNumber, DatePicker, Select, message, Popconfirm, Card, Row, Col, Statistic, Tabs } from 'antd';
 import { PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { expensesApi, financeApi } from '@/lib/api';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 import dayjs from 'dayjs';
 
 export default function FinancePage() {
@@ -27,19 +29,19 @@ export default function FinancePage() {
         expensesApi.getAll(),
         financeApi.getJournalEntries(),
       ]);
-      
+
       // Handle expenses - backend returns { data: [...] }
-      const expensesData = expensesRes.data 
+      const expensesData = expensesRes.data
         ? (Array.isArray(expensesRes.data) ? expensesRes.data : [])
         : (Array.isArray(expensesRes) ? expensesRes : []);
       setExpenses(expensesData);
       console.log('Expenses loaded:', expensesData);
-      
+
       // Handle journal entries - backend returns { data: [...] }
-      const journalData = journalRes.data 
+      const journalData = journalRes.data
         ? (Array.isArray(journalRes.data) ? journalRes.data : [])
         : (Array.isArray(journalRes) ? journalRes : []);
-      const incomeEntries = journalData.filter((entry: Record<string, unknown>) => 
+      const incomeEntries = journalData.filter((entry: Record<string, unknown>) =>
         String(entry.entry_type || '').toLowerCase() === 'income'
       );
       setIncome(incomeEntries);
@@ -108,7 +110,7 @@ export default function FinancePage() {
           payment_method: values.payment_method || null,
           reference_no: values.reference_no || null,
         };
-        
+
         if (editingRecord) {
           await expensesApi.update(Number(editingRecord.id), expenseData);
           message.success('Expense updated');
@@ -126,7 +128,7 @@ export default function FinancePage() {
           reference: values.reference,
           memo: values.notes,
         };
-        
+
         if (editingRecord) {
           await financeApi.updateJournalEntry(Number(editingRecord.id), journalData);
           message.success('Income updated');
@@ -166,18 +168,18 @@ export default function FinancePage() {
   const expenseColumns = [
     { title: 'Date', dataIndex: 'date', key: 'date', width: 110, render: (d: string) => <span style={{ fontSize: '11px' }}>{dayjs(d).format('DD MMM YYYY')}</span> },
     { title: 'Description', dataIndex: 'description', key: 'description', ellipsis: true, render: (t: string) => <span style={{ fontSize: '11px' }}>{t}</span> },
-    { 
-      title: 'Category', 
-      dataIndex: 'category', 
-      key: 'category', 
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
       width: 120,
       render: (cat: string) => <Tag color="orange" style={{ fontSize: '11px' }}>{cat}</Tag>
     },
     { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 120, render: (v: number) => <span style={{ fontSize: '11px', color: '#ff4d4f', fontWeight: 600 }}>Rs. {v?.toLocaleString()}</span> },
-    { 
-      title: 'Status', 
-      dataIndex: 'status', 
-      key: 'status', 
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       width: 100,
       render: (status: string) => {
         const colors: Record<string, string> = { pending: 'orange', approved: 'blue', paid: 'green', rejected: 'red' };
@@ -209,10 +211,10 @@ export default function FinancePage() {
   const incomeColumns = [
     { title: 'Date', dataIndex: 'date', key: 'date', width: 110, render: (d: string) => <span style={{ fontSize: '11px' }}>{dayjs(d).format('DD MMM YYYY')}</span> },
     { title: 'Description', dataIndex: 'description', key: 'description', ellipsis: true, render: (t: string) => <span style={{ fontSize: '11px' }}>{t}</span> },
-    { 
-      title: 'Category', 
-      dataIndex: 'category', 
-      key: 'category', 
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
       width: 120,
       render: (cat: string) => <Tag color="green" style={{ fontSize: '11px' }}>{cat}</Tag>
     },
@@ -233,13 +235,13 @@ export default function FinancePage() {
     },
   ];
 
-  const filteredExpenses = expenses.filter(exp => 
+  const filteredExpenses = expenses.filter(exp =>
     String(exp.description || '').toLowerCase().includes(searchText.toLowerCase()) ||
     String(exp.category || '').toLowerCase().includes(searchText.toLowerCase()) ||
     String(exp.vendor || '').toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const filteredIncome = income.filter(inc => 
+  const filteredIncome = income.filter(inc =>
     String(inc.description || '').toLowerCase().includes(searchText.toLowerCase()) ||
     String(inc.category || '').toLowerCase().includes(searchText.toLowerCase())
   );
@@ -305,13 +307,53 @@ export default function FinancePage() {
         </Col>
       </Row>
 
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Expense by Category" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: Array.from(new Set(filteredExpenses.map(e => String(e.category || 'Other')))),
+                datasets: [
+                  {
+                    label: 'Amount (Rs.)',
+                    data: Array.from(new Set(filteredExpenses.map(e => String(e.category || 'Other')))).map(cat =>
+                      filteredExpenses.filter(e => String(e.category || 'Other') === cat).reduce((sum, e) => sum + Number(e.amount || 0), 0)
+                    ),
+                    backgroundColor: ['#ff4d4f', '#faad14', '#1890ff', '#52c41a', '#722ed1', '#13c2c2'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Cash Flow Overview" bordered={false} className="shadow-sm">
+            <BarChart
+              data={{
+                labels: ['Income', 'Expenses'],
+                datasets: [
+                  {
+                    label: 'Amount (Rs.)',
+                    data: [totalIncome, totalExpenses],
+                    backgroundColor: ['#52c41a', '#ff4d4f'],
+                    borderRadius: 4,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
       <Tabs defaultActiveKey="expenses">
-        <Tabs.TabPane 
+        <Tabs.TabPane
           tab={
             <span>
               <FallOutlined /> Expenses
             </span>
-          } 
+          }
           key="expenses"
         >
           <div style={{ marginBottom: '16px', textAlign: 'right' }}>
@@ -319,13 +361,13 @@ export default function FinancePage() {
           </div>
           <Table columns={expenseColumns} dataSource={filteredExpenses} rowKey="id" loading={loading} size="small" pagination={{ pageSize: 20 }} style={{ fontSize: '11px' }} />
         </Tabs.TabPane>
-        
-        <Tabs.TabPane 
+
+        <Tabs.TabPane
           tab={
             <span>
               <RiseOutlined /> Income
             </span>
-          } 
+          }
           key="income"
         >
           <div style={{ marginBottom: '16px', textAlign: 'right' }}>
@@ -351,16 +393,16 @@ export default function FinancePage() {
         }
       >
         <Form form={form} layout="vertical">
-          <div style={{ 
-            background: transactionType === 'income' 
-              ? 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)' 
-              : 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)', 
-            color: 'white', 
-            padding: '12px 16px', 
-            marginBottom: '24px', 
-            borderRadius: '4px', 
-            fontSize: '14px', 
-            fontWeight: 600 
+          <div style={{
+            background: transactionType === 'income'
+              ? 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)'
+              : 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
+            color: 'white',
+            padding: '12px 16px',
+            marginBottom: '24px',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: 600
           }}>
             {transactionType === 'income' ? 'Income' : 'Expense'} Details
           </div>
@@ -409,7 +451,7 @@ export default function FinancePage() {
               <Form.Item name="vendor" label="Vendor">
                 <Input placeholder="Vendor/Supplier name" />
               </Form.Item>
-              
+
               <Form.Item name="status" label="Status" initialValue="pending">
                 <Select>
                   <Select.Option value="pending">Pending</Select.Option>

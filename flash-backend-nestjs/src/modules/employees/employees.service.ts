@@ -547,17 +547,26 @@ export class EmployeesService {
       const employee = await this.findByDbId(employee_db_id);
       const employeeId = (employee as any).employee_id;
 
-      this.logger.log(`Starting upload for employee ${employeeId}: ${filename}`);
+      if (!employeeId) {
+        this.logger.error(`Employee found by DB ID ${employee_db_id} but has no employee_id string`);
+        throw new Error(`Employee record is incomplete (missing employee_id)`);
+      }
+
+      this.logger.log(`Starting upload for employee ${employeeId} (DB ID: ${employee_db_id}): ${filename}`);
       
       // Upload to Cloud Storage
-      const { url } = await this.cloudStorageService.uploadFile(
+      const uploadResult = await this.cloudStorageService.uploadFile(
         fileBuffer,
         filename,
         mime_type || 'application/octet-stream',
         `employees/${employeeId}`,
-      );
+      ).catch(err => {
+        this.logger.error(`Cloud upload failed: ${err.message}`);
+        throw err;
+      });
 
-      this.logger.log(`Cloud upload successful for ${filename}`);
+      const url = uploadResult.url;
+      this.logger.log(`Cloud upload successful for ${filename}. URL: ${url}`);
 
       // If uploading a profile photo, update the employee record directly and skip the document record
       if (category === 'profile_photo') {
@@ -596,6 +605,7 @@ export class EmployeesService {
       }
 
       // Store reference in database for all other documents
+      this.logger.log(`Saving document reference to database table 'employee_files'...`);
       const [result] = await this.db
         .insert(schema.employeeFiles)
         .values({
@@ -605,12 +615,19 @@ export class EmployeesService {
           file_path: url, 
           file_type: mime_type,
         })
-        .returning();
+        .returning()
+        .catch(dbErr => {
+          this.logger.error(`Database error while saving document: ${dbErr.message}`);
+          if (dbErr.message.includes('relation "employee_files" does not exist')) {
+            throw new Error('Database table "employee_files" is missing. Please run migrations.');
+          }
+          throw dbErr;
+        });
       
-      this.logger.log(`Employee document saved to database: ${filename}`);
+      this.logger.log(`Employee document saved to database with ID: ${result.id}`);
       return result;
     } catch (error) {
-      this.logger.error(`Failed to upload document for employee ${employee_db_id}:`, error);
+      this.logger.error(`Failed to upload document for employee ${employee_db_id}: ${error.stack}`);
       throw error;
     }
   }

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Drawer, Form, Input, InputNumber, DatePicker, Select, message, Popconfirm, Card, Row, Col, Statistic, Tabs, Modal } from 'antd';
 import { PlusOutlined, DollarOutlined, CheckCircleOutlined, ClockCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { advancesApi, employeeApi } from '@/lib/api';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 import dayjs from 'dayjs';
 
 export default function AdvancesPage() {
@@ -50,16 +52,16 @@ export default function AdvancesPage() {
         advancesApi.getAdvances(),
         advancesApi.getDeductions(),
       ]);
-      
+
       // Handle advances - backend may return { data: [...] } or array
-      const advancesData = advancesRes.data 
+      const advancesData = advancesRes.data
         ? (Array.isArray(advancesRes.data) ? advancesRes.data : [])
         : (Array.isArray(advancesRes) ? advancesRes : []);
       setAdvances(advancesData);
       console.log('Advances loaded:', advancesData);
-      
+
       // Handle deductions - backend may return { data: [...] } or array
-      const deductionsData = deductionsRes.data 
+      const deductionsData = deductionsRes.data
         ? (Array.isArray(deductionsRes.data) ? deductionsRes.data : [])
         : (Array.isArray(deductionsRes) ? deductionsRes : []);
       setDeductions(deductionsData);
@@ -125,10 +127,10 @@ export default function AdvancesPage() {
     { title: 'Amount', dataIndex: 'amount', key: 'amount', width: 120, render: (v: number) => <span style={{ fontSize: '11px', fontWeight: 600, color: '#ff4d4f' }}>Rs. {v?.toLocaleString()}</span> },
     { title: 'Repayment', dataIndex: 'repayment_months', key: 'repayment_months', width: 100, render: (v: number) => <span style={{ fontSize: '11px' }}>{v} months</span> },
     { title: 'Reason', dataIndex: 'reason', key: 'reason', ellipsis: true, render: (t: string) => <span style={{ fontSize: '11px' }}>{t}</span> },
-    { 
-      title: 'Status', 
-      dataIndex: 'status', 
-      key: 'status', 
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       width: 100,
       render: (status: string) => {
         const colors: Record<string, string> = { pending: 'orange', approved: 'blue', active: 'green', completed: 'default', rejected: 'red' };
@@ -157,7 +159,7 @@ export default function AdvancesPage() {
     { title: 'Remaining', dataIndex: 'remaining_balance', key: 'remaining_balance', width: 120, render: (v: number) => <span style={{ fontSize: '11px', color: '#ff4d4f' }}>Rs. {v?.toLocaleString()}</span> },
   ];
 
-  const filteredAdvances = advances.filter(adv => 
+  const filteredAdvances = advances.filter(adv =>
     String(adv.employee_id || '').toLowerCase().includes(searchText.toLowerCase()) ||
     String(adv.employee_name || '').toLowerCase().includes(searchText.toLowerCase()) ||
     String(adv.reason || '').toLowerCase().includes(searchText.toLowerCase())
@@ -173,7 +175,7 @@ export default function AdvancesPage() {
     const empAdvances = filteredAdvances.filter(adv => adv.employee_db_id === emp.id);
     const totalAmount = empAdvances.reduce((sum, adv) => sum + Number(adv.amount || 0), 0);
     const activeCount = empAdvances.filter(adv => adv.status === 'active' || adv.status === 'approved').length;
-    
+
     return {
       ...emp,
       advanceCount: empAdvances.length,
@@ -253,11 +255,53 @@ export default function AdvancesPage() {
         </Col>
       </Row>
 
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Advance Status Distribution" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: Array.from(new Set(filteredAdvances.map(a => String(a.status || 'pending')))),
+                datasets: [
+                  {
+                    label: 'Advances',
+                    data: Array.from(new Set(filteredAdvances.map(a => String(a.status || 'pending')))).map(status =>
+                      filteredAdvances.filter(a => String(a.status || 'pending') === status).length
+                    ),
+                    backgroundColor: ['#faad14', '#1890ff', '#52c41a', '#8c8c8c', '#ff4d4f'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Monthly Advances Tracking" bordered={false} className="shadow-sm">
+            <BarChart
+              data={{
+                labels: Array.from(new Set(filteredAdvances.map(a => dayjs(String(a.date)).format('MMM YYYY')))).reverse(),
+                datasets: [
+                  {
+                    label: 'Amount (Rs.)',
+                    data: Array.from(new Set(filteredAdvances.map(a => dayjs(String(a.date)).format('MMM YYYY')))).reverse().map(month =>
+                      filteredAdvances.filter(a => dayjs(String(a.date)).format('MMM YYYY') === month).reduce((sum, a) => sum + Number(a.amount || 0), 0)
+                    ),
+                    backgroundColor: '#ff4d4f',
+                    borderRadius: 4,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
       <Tabs defaultActiveKey="advances">
         <Tabs.TabPane tab="Advances" key="advances">
           <Table columns={advanceColumns} dataSource={filteredAdvances} rowKey="id" loading={loading} size="small" pagination={{ pageSize: 20 }} style={{ fontSize: '11px' }} />
         </Tabs.TabPane>
-        
+
         <Tabs.TabPane tab="Deductions" key="deductions">
           <Table columns={deductionColumns} dataSource={deductions} rowKey="id" loading={loading} size="small" pagination={{ pageSize: 20 }} style={{ fontSize: '11px' }} />
         </Tabs.TabPane>
@@ -284,14 +328,14 @@ export default function AdvancesPage() {
         }
       >
         <Form form={form} layout="vertical">
-          <div style={{ 
-            background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)', 
-            color: 'white', 
-            padding: '12px 16px', 
-            marginBottom: '24px', 
-            borderRadius: '4px', 
-            fontSize: '14px', 
-            fontWeight: 600 
+          <div style={{
+            background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
+            color: 'white',
+            padding: '12px 16px',
+            marginBottom: '24px',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: 600
           }}>
             Advance Details
           </div>

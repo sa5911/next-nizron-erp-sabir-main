@@ -16,6 +16,8 @@ import {
 } from '@ant-design/icons';
 import { employeeApi, vehicleApi, clientApi, attendanceApi, expensesApi, advancesApi, generalInventoryApi } from '@/lib/api';
 import dayjs from 'dayjs';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 export default function DashboardHome() {
   const [stats, setStats] = useState({
@@ -284,50 +286,44 @@ export default function DashboardHome() {
 
       {/* Financial Overview */}
       <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24}>
-          <Card title="Financial Overview (This Month)" loading={loading}>
-            <Row gutter={16}>
-              <Col xs={24} sm={8}>
-                <Card style={{ backgroundColor: '#f6ffed', border: '1px solid #b7eb8f' }}>
-                  <Statistic
-                    title="Income"
-                    value={stats.monthlyIncome}
-                    valueStyle={{ fontSize: '24px', color: '#52c41a' }}
-                    prefix={<RiseOutlined />}
-                    suffix="Rs."
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Card style={{ backgroundColor: '#fff1f0', border: '1px solid #ffccc7' }}>
-                  <Statistic
-                    title="Expenses"
-                    value={stats.monthlyExpenses}
-                    valueStyle={{ fontSize: '24px', color: '#ff4d4f' }}
-                    prefix={<FallOutlined />}
-                    suffix="Rs."
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Card style={{ backgroundColor: '#e6f7ff', border: '1px solid #91d5ff' }}>
-                  <Statistic
-                    title="Net Balance"
-                    value={stats.monthlyIncome - stats.monthlyExpenses}
-                    valueStyle={{
-                      fontSize: '24px',
-                      color: (stats.monthlyIncome - stats.monthlyExpenses) >= 0 ? '#52c41a' : '#ff4d4f',
-                      fontWeight: 600
-                    }}
-                    prefix={<DollarOutlined />}
-                    suffix="Rs."
-                  />
-                </Card>
-              </Col>
-            </Row>
+        <Col xs={24} lg={12}>
+          <Card title="Attendance Overview (Today)" loading={loading} style={{ height: '100%' }}>
+            <PieChart
+              data={{
+                labels: ['Present', 'Absent'],
+                datasets: [
+                  {
+                    label: 'Attendance',
+                    data: [stats.todayPresent, stats.todayAbsent],
+                    backgroundColor: ['#52c41a', '#ff4d4f'],
+                    borderColor: ['#fff', '#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Financial Overview (Monthly)" loading={loading} style={{ height: '100%' }}>
+            <BarChart
+              data={{
+                labels: ['Income', 'Expenses'],
+                datasets: [
+                  {
+                    label: 'Amount (Rs.)',
+                    data: [stats.monthlyIncome, stats.monthlyExpenses],
+                    backgroundColor: ['#52c41a', '#ff4d4f'],
+                    borderRadius: 6,
+                  },
+                ],
+              }}
+            />
           </Card>
         </Col>
       </Row>
+
+      {/* Financial Overview Stats */}
 
       {/* Recent Activities */}
       <Row gutter={[16, 16]}>

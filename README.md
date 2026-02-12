@@ -1,4 +1,4 @@
-# Flash ERP - Dockploy Deployment Guide
+# Nizron ERP - Dockploy Deployment Guide
 
 This repository contains two apps:
 - Backend (NestJS): `flash-backend-nestjs`

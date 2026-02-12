@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Table, Button, Space, Drawer, Form, Input, DatePicker, Select, InputNumber, message, Popconfirm, Card, Row, Col, Statistic, Tag } from 'antd';
 import { PlusOutlined, DashboardOutlined } from '@ant-design/icons';
 import { fuelEntryApi, vehicleApi } from '@/lib/api';
+import BarChart from '@/components/charts/BarChart';
 import dayjs from 'dayjs';
 
 export default function FuelEntriesPage() {
@@ -219,6 +220,48 @@ export default function FuelEntriesPage() {
         </Col>
         <Col span={8}>
           <Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Cost</span>} value={totalCost} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix="Rs." /></Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Fuel Cost by Vehicle" bordered={false} className="shadow-sm">
+            <BarChart
+              horizontal
+              data={{
+                labels: Array.from(new Set(filteredEntries.map(e => String(e.vehicle_id)))),
+                datasets: [
+                  {
+                    label: 'Total Cost (Rs.)',
+                    data: Array.from(new Set(filteredEntries.map(e => String(e.vehicle_id)))).map(id =>
+                      filteredEntries.filter(e => String(e.vehicle_id) === id).reduce((sum, e) => sum + Number(e.total_cost || 0), 0)
+                    ),
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4,
+                  }
+                ]
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Monthly Fuel Consumption" bordered={false} className="shadow-sm">
+            <BarChart
+              data={{
+                labels: Array.from(new Set(filteredEntries.map(e => dayjs(String(e.entry_date)).format('MMM YYYY')))).reverse(),
+                datasets: [
+                  {
+                    label: 'Liters',
+                    data: Array.from(new Set(filteredEntries.map(e => dayjs(String(e.entry_date)).format('MMM YYYY')))).reverse().map(month =>
+                      filteredEntries.filter(e => dayjs(String(e.entry_date)).format('MMM YYYY') === month).reduce((sum, e) => sum + Number(e.liters || 0), 0)
+                    ),
+                    backgroundColor: '#10b981',
+                    borderRadius: 4,
+                  }
+                ]
+              }}
+            />
+          </Card>
         </Col>
       </Row>
 

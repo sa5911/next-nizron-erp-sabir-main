@@ -80,12 +80,12 @@ export default function LoginScreen() {
             <View style={styles.headerSection}>
               <View style={styles.logoContainer}>
                 <Image
-                  source={require('../assets/images/icon.png')}
+                  source={require('../assets/images/images.png')}
                   style={styles.logoImage}
                   resizeMode="contain"
                 />
               </View>
-              <Text style={styles.welcomeTitle}>Flash Tech ERP</Text>
+              <Text style={styles.welcomeTitle}>Nizron Tech ERP</Text>
               <Text style={styles.welcomeSubtitle}>Employee Portal</Text>
             </View>
 

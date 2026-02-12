@@ -1,5 +1,5 @@
 {
-  "name": "flash-frontend-next-antd",
+  "name": "nizron-frontend-next-antd",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -16,9 +16,11 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "antd": "^6.2.0",
+    "chart.js": "^4.5.1",
     "dayjs": "^1.11.19",
     "next": "16.1.1",
     "react": "19.2.3",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.3",
     "react-to-print": "^3.2.0"
   },

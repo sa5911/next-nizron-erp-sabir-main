@@ -24,7 +24,7 @@ export class CompanySettingsService {
       const [newSettings] = await this.db
         .insert(schema.companySettings)
         .values({
-          name: 'Flash Security Services',
+          name: 'Nizron Security Services',
         })
         .returning();
       return newSettings;

@@ -224,6 +224,10 @@ export class EmployeesController {
     @Body('name') name: string,
     @Body('category') category: string,
   ) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
     // Upload to B2 and get URL
     return this.employeesService.uploadDocument(
       employeeDbId,

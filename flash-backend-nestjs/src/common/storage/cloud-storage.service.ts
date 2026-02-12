@@ -9,12 +9,7 @@ import {
 import { DRIZZLE } from '../../db/drizzle.module';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../../db/schema';
-
-const B2_CONFIG_DEFAULTS = {
-  endpoint: 'https://s3.us-east-005.backblazeb2.com',
-  bucketName: 'flash-erp',
-  region: 'us-east-005',
-};
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class CloudStorageService {
@@ -41,48 +36,21 @@ export class CloudStorageService {
   }
 
   private initializeFromEnv() {
-    // Check for Cloudflare R2 first, then Backblaze B2
-    const r2AccessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID');
-    const b2AccessKeyId =
-      this.configService.get<string>('B2_APPLICATION_KEY_ID') ??
-      this.configService.get<string>('B2_KEY_ID');
-
-    const accessKeyId = r2AccessKeyId || b2AccessKeyId;
-
-    const r2SecretAccessKey = this.configService.get<string>(
-      'R2_SECRET_ACCESS_KEY',
-    );
-    const b2SecretAccessKey = this.configService.get<string>(
-      'B2_APPLICATION_KEY',
-    );
-    const secretAccessKey = r2SecretAccessKey || b2SecretAccessKey;
-
-    const r2BucketName = this.configService.get<string>('R2_BUCKET_NAME');
-    const b2BucketName =
-      this.configService.get<string>('B2_BUCKET_NAME') ??
-      B2_CONFIG_DEFAULTS.bucketName;
-    this.bucketName = r2BucketName || b2BucketName;
-
-    const r2Endpoint = this.configService.get<string>('R2_ENDPOINT');
-    const b2Endpoint =
-      this.configService.get<string>('B2_ENDPOINT') ??
-      B2_CONFIG_DEFAULTS.endpoint;
-    this.endpoint = r2Endpoint || b2Endpoint;
-
-    const r2Region = this.configService.get<string>('R2_REGION') ?? 'auto';
-    const b2Region =
-      this.configService.get<string>('B2_REGION') ?? B2_CONFIG_DEFAULTS.region;
-    this.region = r2AccessKeyId ? r2Region : b2Region;
+    // Principal configuration uses R2_ keys, but works for any S3-compatible provider
+    const accessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('R2_SECRET_ACCESS_KEY');
+    
+    this.bucketName = this.configService.get<string>('R2_BUCKET_NAME');
+    this.endpoint = this.configService.get<string>('R2_ENDPOINT');
+    this.region = this.configService.get<string>('R2_REGION') ?? 'auto';
 
     this.publicUrlPrefix =
       this.configService.get<string>('R2_PUBLIC_URL_PREFIX') ||
       this.configService.get<string>('STORAGE_PUBLIC_URL_PREFIX');
 
-    const provider = r2AccessKeyId ? 'Cloudflare R2' : 'Backblaze B2';
-
     if (!accessKeyId || !secretAccessKey || !this.bucketName || !this.endpoint) {
       this.logger.warn(
-        `Missing required Cloud Storage configuration (${provider}). Cloud uploads will be disabled until configured in UI.`,
+        `Cloud Storage configuration is incomplete. Cloud uploads will be disabled until configured.`,
       );
       return;
     }
@@ -95,12 +63,12 @@ export class CloudStorageService {
           accessKeyId,
           secretAccessKey,
         },
-        // Essential for R2 and B2 S3 compatibility
+        // Essential for S3 compatibility providers like Cloudflare R2
         forcePathStyle: true,
       });
 
       this.logger.log(
-        `Cloud Storage (${provider} S3) initialized from ENV. Bucket: ${this.bucketName}`,
+        `Cloud Storage initialized from ENV. Bucket: ${this.bucketName}`,
       );
     } catch (error) {
       this.logger.error(`Failed to initialize S3 client: ${error.message}`);
@@ -133,20 +101,8 @@ export class CloudStorageService {
     }
   }
 
-  private uuidModulePromise: Promise<typeof import('uuid')> | null = null;
-
-  private async loadUuidModule() {
-    // Use runtime dynamic import to avoid require() on ESM uuid after compilation to CJS
-    if (!this.uuidModulePromise) {
-      const dynamicImport = new Function('specifier', 'return import(specifier);');
-      this.uuidModulePromise = dynamicImport('uuid') as Promise<typeof import('uuid')>;
-    }
-    return this.uuidModulePromise;
-  }
-
   private async generateUuid(): Promise<string> {
-    const { v4 } = await this.loadUuidModule();
-    return v4();
+    return randomUUID();
   }
 
   async uploadFile(

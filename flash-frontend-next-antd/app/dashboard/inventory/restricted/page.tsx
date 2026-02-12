@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Drawer, Form, Input, InputNumber, Select, message, Popconfirm, Card, Row, Col, Statistic, Tabs, Modal } from 'antd';
 import { PlusOutlined, SafetyOutlined, LockOutlined, CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { restrictedInventoryApi, employeeApi } from '@/lib/api';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 export default function RestrictedInventoryPage() {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
@@ -667,6 +669,52 @@ export default function RestrictedInventoryPage() {
         </Col>
         <Col span={6}>
           <Card><Statistic title={<span style={{ fontSize: '12px' }}>Issued</span>} value={issuedUnits} valueStyle={{ fontSize: '20px', color: '#faad14' }} prefix={<CloseCircleOutlined />} /></Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Category Breakdown" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: Array.from(new Set(items.map(i => String(i.category || 'Other')))),
+                datasets: [
+                  {
+                    label: 'Items',
+                    data: Array.from(new Set(items.map(i => String(i.category || 'Other')))).map(cat =>
+                      items.filter(i => String(i.category || 'Other') === cat).length
+                    ),
+                    backgroundColor: ['#ff4d4f', '#faad14', '#1890ff', '#52c41a', '#722ed1', '#13c2c2'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Equipment Status" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: ['Available', 'Issued', 'Low Stock', 'Out of Stock'],
+                datasets: [
+                  {
+                    label: 'Units',
+                    data: [
+                      items.filter(i => Number(i.serial_in_stock || 0) > Number(i.min_quantity || 0)).length,
+                      items.filter(i => Number(i.issued_units || 0) > 0).length,
+                      items.filter(i => Number(i.serial_in_stock || 0) <= Number(i.min_quantity || 0) && Number(i.serial_in_stock || 0) > 0).length,
+                      items.filter(i => Number(i.serial_total || 0) === 0 || Number(i.serial_in_stock || 0) === 0).length,
+                    ],
+                    backgroundColor: ['#52c41a', '#1890ff', '#faad14', '#ff4d4f'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
         </Col>
       </Row>
 

@@ -2,7 +2,7 @@ import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const companySettings = pgTable('company_settings', {
   id: serial('id').primaryKey(),
-  name: text('name').notNull().default('Flash Security Services'),
+  name: text('name').notNull().default('Nizron Security Services'),
   address: text('address'),
   phone: text('phone'),
   email: text('email'),

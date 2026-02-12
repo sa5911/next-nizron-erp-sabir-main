@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Drawer, Form, Input, DatePicker, Select, InputNumber, message, Popconfirm, Card, Row, Col, Statistic } from 'antd';
 import { PlusOutlined, ToolOutlined } from '@ant-design/icons';
 import { vehicleMaintenanceApi, vehicleApi } from '@/lib/api';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 import dayjs from 'dayjs';
 
 export default function VehicleMaintenancePage() {
@@ -241,6 +243,49 @@ export default function VehicleMaintenancePage() {
         </Col>
         <Col span={6}>
           <Card><Statistic title={<span style={{ fontSize: '12px' }}>Repairs</span>} value={repairCount} valueStyle={{ fontSize: '20px', color: '#faad14' }} /></Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Maintenance Cost by Type" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: Array.from(new Set(filteredRecords.map(r => String(r.maintenance_type || 'unknown')))),
+                datasets: [
+                  {
+                    label: 'Total Cost (Rs.)',
+                    data: Array.from(new Set(filteredRecords.map(r => String(r.maintenance_type || 'unknown')))).map(type =>
+                      filteredRecords.filter(r => String(r.maintenance_type) === type).reduce((sum, r) => sum + Number(r.cost || 0), 0)
+                    ),
+                    backgroundColor: ['#1890ff', '#faad14', '#52c41a', '#ff4d4f'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  }
+                ]
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Vehicle Maintenance Expenses" bordered={false} className="shadow-sm">
+            <BarChart
+              horizontal
+              data={{
+                labels: Array.from(new Set(filteredRecords.map(r => String(r.vehicle_id)))),
+                datasets: [
+                  {
+                    label: 'Cost (Rs.)',
+                    data: Array.from(new Set(filteredRecords.map(r => String(r.vehicle_id)))).map(id =>
+                      filteredRecords.filter(r => String(r.vehicle_id) === id).reduce((sum, r) => sum + Number(r.cost || 0), 0)
+                    ),
+                    backgroundColor: '#722ed1',
+                    borderRadius: 4,
+                  }
+                ]
+              }}
+            />
+          </Card>
         </Col>
       </Row>
 

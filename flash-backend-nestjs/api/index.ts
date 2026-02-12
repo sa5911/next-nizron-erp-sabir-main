@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import * as express from 'express';
 
 let app: any;
 
@@ -12,6 +13,10 @@ async function createApp() {
     app = await NestFactory.create(AppModule, {
       logger: false,
     });
+
+    // Increase body size limit for Vercel
+    app.use(express.json({ limit: '100mb' }));
+    app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
     app.useGlobalFilters(new HttpExceptionFilter());
 

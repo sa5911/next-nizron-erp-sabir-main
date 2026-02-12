@@ -452,7 +452,7 @@ export const restrictedTransactions = pgTable("restricted_transactions", {
 
 export const companySettings = pgTable("company_settings", {
 	id: serial().primaryKey().notNull(),
-	name: text().default('Flash Security Services').notNull(),
+	name: text().default('Nizron Security Services').notNull(),
 	address: text(),
 	phone: text(),
 	email: text(),

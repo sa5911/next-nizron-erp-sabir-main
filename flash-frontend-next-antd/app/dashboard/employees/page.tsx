@@ -38,6 +38,8 @@ import {
 } from '@ant-design/icons';
 import { employeeApi, generalInventoryApi, restrictedInventoryApi, authApi } from '@/lib/api';
 import EmployeeForm from './EmployeeForm';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 const { Search } = Input;
 
@@ -675,6 +677,56 @@ export default function EmployeesPage() {
               valueStyle={{ color: '#cf1322' }}
               prefix={<StopOutlined />}
             />
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} lg={24}>
+          <Card title="Employee Insights" bordered={false} className="shadow-sm">
+            <Row gutter={[32, 16]} align="middle">
+              <Col xs={24} md={12}>
+                <div className="flex flex-col items-center">
+                  <h4 className="text-gray-500 mb-4">Status Distribution</h4>
+                  <PieChart
+                    data={{
+                      labels: Object.keys(kpis.by_status),
+                      datasets: [
+                        {
+                          label: 'Employees',
+                          data: Object.values(kpis.by_status),
+                          backgroundColor: ['#52c41a', '#ff4d4f', '#faad14', '#1890ff'],
+                          borderColor: ['#fff'],
+                          borderWidth: 2,
+                        },
+                      ],
+                    }}
+                  />
+                </div>
+              </Col>
+              <Col xs={24} md={12}>
+                <div className="flex flex-col items-center">
+                  <h4 className="text-gray-500 mb-4">Workforce Summary</h4>
+                  <div className="w-full grid grid-cols-2 gap-4 mt-4">
+                    <div className="bg-blue-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-blue-600">{kpis.total}</div>
+                      <div className="text-xs text-blue-400 uppercase tracking-wider">Total Strength</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-600">{kpis.by_status['Active'] || 0}</div>
+                      <div className="text-xs text-green-400 uppercase tracking-wider">Currently Active</div>
+                    </div>
+                    <div className="bg-red-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-red-600">{(kpis.by_status['Inactive'] || 0) + (kpis.by_status['Suspended'] || 0)}</div>
+                      <div className="text-xs text-red-400 uppercase tracking-wider">Inactive/Suspended</div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-orange-600">{kpis.total - (kpis.by_status['Active'] || 0) - (kpis.by_status['Inactive'] || 0) - (kpis.by_status['Suspended'] || 0)}</div>
+                      <div className="text-xs text-orange-400 uppercase tracking-wider">Others</div>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            </Row>
           </Card>
         </Col>
       </Row>

@@ -16,6 +16,7 @@ import {
   Form,
   Row,
   Col,
+  Card,
 } from 'antd';
 import {
   PlusOutlined,
@@ -27,6 +28,8 @@ import {
 } from '@ant-design/icons';
 import { vehicleApi } from '@/lib/api';
 import VehicleForm from './VehicleForm';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 const { Search } = Input;
 
@@ -319,6 +322,51 @@ export default function VehiclesPage() {
           Add Vehicle
         </Button>
       </div>
+
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} lg={12}>
+          <Card title="Vehicle Type Distribution" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: Array.from(new Set(vehicles.map(v => v.vehicle_type || 'Unknown'))),
+                datasets: [
+                  {
+                    label: 'Vehicles',
+                    data: Array.from(new Set(vehicles.map(v => v.vehicle_type || 'Unknown'))).map(type =>
+                      vehicles.filter(v => (v.vehicle_type || 'Unknown') === type).length
+                    ),
+                    backgroundColor: ['#1890ff', '#722ed1', '#13c2c2', '#faad14', '#52c41a', '#ff4d4f'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Vehicle Status" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: ['Active', 'Inactive', 'Other'],
+                datasets: [
+                  {
+                    label: 'Status',
+                    data: [
+                      vehicles.filter(v => String(v.status).toLowerCase() === 'active').length,
+                      vehicles.filter(v => String(v.status).toLowerCase() === 'inactive').length,
+                      vehicles.filter(v => !['active', 'inactive'].includes(String(v.status).toLowerCase())).length,
+                    ],
+                    backgroundColor: ['#52c41a', '#ff4d4f', '#faad14'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
       <div className="mb-4 flex gap-4">
         <Button icon={<ReloadOutlined />} onClick={() => fetchVehicles()}>

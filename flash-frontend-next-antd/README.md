@@ -1,6 +1,6 @@
-# Flash Security - Next.js Frontend with Ant Design
+# Nizron Security - Next.js Frontend with Ant Design
 
-Modern management system for Flash Security Company built with Next.js 16, Ant Design 6, and TypeScript.
+Modern management system for Nizron Security Company built with Next.js 16, Ant Design 6, and TypeScript.
 
 ## 🚀 Features
 
@@ -178,7 +178,7 @@ This frontend connects to the NestJS backend at `http://localhost:8000`.
 
 ## 📄 License
 
-Private - Flash Security Company
+Private - Nizron Security Company
 
 ---
 

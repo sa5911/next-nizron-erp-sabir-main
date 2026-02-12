@@ -3,32 +3,46 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  HttpStatus,
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-@Catch(HttpException)
+@Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger('HttpExceptionFilter');
 
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status = exception.getStatus();
-    const message = exception.getResponse();
+    
+    const status = 
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const message = 
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : exception.message || 'Internal server error';
 
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       message: typeof message === 'string' ? message : (message as any).message || message,
-      error: typeof message === 'string' ? 'Error' : (message as any).error || 'Error',
+      error: typeof message === 'string' ? (status === 500 ? 'Internal Server Error' : 'Error') : (message as any).error || 'Error',
+      stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
     };
 
     this.logger.error(
-      `${request.method} ${request.url} ${status} - ${JSON.stringify(errorResponse)}`,
+      `${request.method} ${request.url} ${status} - ${typeof message === 'string' ? message : JSON.stringify(message)}`,
     );
+
+    if (status === 500 && !(exception instanceof HttpException)) {
+      this.logger.error(exception.stack);
+    }
 
     response.status(status).json(errorResponse);
   }

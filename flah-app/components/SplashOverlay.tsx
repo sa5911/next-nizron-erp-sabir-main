@@ -58,7 +58,7 @@ export const SplashOverlay: React.FC<SplashOverlayProps> = ({ visible, onFinish 
     return (
         <Animated.View style={[styles.container, { opacity }]}>
             <Animated.Image
-                source={require('../assets/images/splash-icon.png')}
+                source={require('../assets/images/images.png')}
                 style={[styles.logo, { transform: [{ scale }] }]}
                 resizeMode="contain"
             />

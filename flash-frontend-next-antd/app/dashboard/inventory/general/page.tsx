@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Table, Button, Space, Tag, Drawer, Form, Input, InputNumber, Select, message, Popconfirm, Card, Row, Col, Statistic, Tabs, Modal } from 'antd';
 import { PlusOutlined, InboxOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { generalInventoryApi, employeeApi } from '@/lib/api';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 export default function GeneralInventoryPage() {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
@@ -368,6 +370,50 @@ export default function GeneralInventoryPage() {
               value={totalStock}
               valueStyle={{ fontSize: '20px', color: '#1890ff' }}
               prefix={<InboxOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} lg={12}>
+          <Card title="Stock by Category" bordered={false} className="shadow-sm">
+            <BarChart
+              data={{
+                labels: Array.from(new Set(items.map(i => String(i.category || 'Other')))),
+                datasets: [
+                  {
+                    label: 'Quantity',
+                    data: Array.from(new Set(items.map(i => String(i.category || 'Other')))).map(cat =>
+                      items.filter(i => String(i.category || 'Other') === cat).reduce((sum, i) => sum + getQty(i), 0)
+                    ),
+                    backgroundColor: '#1890ff',
+                    borderRadius: 4,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Inventory Status" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+                datasets: [
+                  {
+                    label: 'Items',
+                    data: [
+                      items.filter(i => getQty(i) > getMin(i) && getQty(i) > 0).length,
+                      items.filter(i => getQty(i) <= getMin(i) && getQty(i) > 0).length,
+                      items.filter(i => getQty(i) === 0).length,
+                    ],
+                    backgroundColor: ['#52c41a', '#faad14', '#ff4d4f'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
             />
           </Card>
         </Col>

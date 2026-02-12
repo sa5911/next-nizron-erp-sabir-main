@@ -22,6 +22,9 @@ import {
 import { clientApi } from '@/lib/api';
 import ClientForm from './ClientForm';
 import IndustriesModal from './IndustriesModal';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
+import { Card, Row, Col } from 'antd';
 
 const { Search } = Input;
 
@@ -218,6 +221,51 @@ export default function ClientsPage() {
           </Button>
         </Space>
       </div>
+
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} lg={12}>
+          <Card title="Industry Distribution" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))),
+                datasets: [
+                  {
+                    label: 'Clients',
+                    data: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))).map(ind =>
+                      clients.filter(c => (c.industry || 'Unknown') === ind).length
+                    ),
+                    backgroundColor: ['#1890ff', '#722ed1', '#13c2c2', '#faad14', '#52c41a', '#ff4d4f'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Client Status" bordered={false} className="shadow-sm">
+            <PieChart
+              data={{
+                labels: ['Active', 'Inactive', 'Other'],
+                datasets: [
+                  {
+                    label: 'Status',
+                    data: [
+                      clients.filter(c => String(c.status).toLowerCase() === 'active').length,
+                      clients.filter(c => String(c.status).toLowerCase() === 'inactive').length,
+                      clients.filter(c => !['active', 'inactive'].includes(String(c.status).toLowerCase())).length,
+                    ],
+                    backgroundColor: ['#52c41a', '#ff4d4f', '#faad14'],
+                    borderColor: ['#fff'],
+                    borderWidth: 2,
+                  },
+                ],
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
       <div className="mb-4">
         <Search
