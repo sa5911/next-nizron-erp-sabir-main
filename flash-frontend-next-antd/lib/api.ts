@@ -15,8 +15,7 @@ class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl: string) {
-    // Normalize base URL to prevent double slashes
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.baseUrl = baseUrl;
   }
 
   private getHeaders(): HeadersInit {
@@ -39,11 +38,7 @@ class ApiClient {
     options: RequestInit = {},
   ): Promise<ApiResponse<T>> {
     try {
-      // Ensure endpoint starts with slash and construct URL properly
-      const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-      const url = `${this.baseUrl}${normalizedEndpoint}`;
-      
-      const response = await fetch(url, {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
         headers: {
           ...this.getHeaders(),
@@ -111,11 +106,7 @@ class ApiClient {
         }
       }
 
-      // Ensure endpoint starts with slash and construct URL properly
-      const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-      const url = `${this.baseUrl}${normalizedEndpoint}`;
-
-      const response = await fetch(url, {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method,
         headers,
         body: formData,
