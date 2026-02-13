@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; // Change this to your actual API base URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-nizron-erp-sabir-main.vercel.app/"; // Change this to your actual API base URL
 
 interface ApiResponse<T> {
   data?: T;

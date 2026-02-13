@@ -40,11 +40,11 @@ Modern management system for Nizron Security Company built with Next.js 16, Ant 
 # Install dependencies
 npm install
 
-# Create environment file
-cp .env.local.example .env.local
+# Create environment file (already created for you)
+# .env.local
 
 # Update .env.local with your backend URL
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=https://backend-nizron-erp-sabir-main.vercel.app
 ```
 
 ## 🚀 Running the Application
@@ -162,7 +162,7 @@ None at the moment. All TypeScript errors resolved.
 
 ## 🤝 Backend Integration
 
-This frontend connects to the NestJS backend at `http://localhost:8000`.
+This frontend connects to the NestJS backend at `https://backend-nizron-erp-sabir-main.vercel.app`.
 
 ### Required Backend Endpoints:
 - `POST /api/auth/login` - Authentication
