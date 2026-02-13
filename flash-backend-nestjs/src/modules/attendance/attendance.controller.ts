@@ -21,7 +21,7 @@ import {
     ApiResponse,
     ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BulkUpsertAttendanceDto, MarkSelfAttendanceDto } from './attendance.dto';

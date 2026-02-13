@@ -3,8 +3,8 @@ import { ApiTags, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { CompanySettingsService } from './company-settings.service';
 import { UpdateCompanySettingsDto } from './dto/company-settings.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { getFileInterceptorOptions, UPLOAD_PATHS } from 'src/common/utils/upload.config';
-import { CloudStorageService } from 'src/common/storage/cloud-storage.service';
+import { getFileInterceptorOptions, UPLOAD_PATHS } from '../../common/utils/upload.config';
+import { CloudStorageService } from '../../common/storage/cloud-storage.service';
 
 @ApiTags('Company Settings')
 @Controller('company-settings')

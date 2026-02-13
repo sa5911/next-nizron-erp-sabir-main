@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Inject } from '@nestjs/common';
-import { DRIZZLE } from 'src/db/drizzle.module';
-import * as schema from 'src/db/schema';
+import { DRIZZLE } from '../../db/drizzle.module';
+import * as schema from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { UpdateCompanySettingsDto } from './dto/company-settings.dto';
 import { CloudStorageService } from '../../common/storage/cloud-storage.service';
